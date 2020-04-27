@@ -10,11 +10,25 @@ CODE SEGMENT
 			KEEP_CS   				DW 	0
 			KEEP_IP   				DW 	0
 			KEEP_PSP  				DW 	0
+			
+			KEEP_SS					DW	0
+			KEEP_SP					DW	0
+			
 			COUNTER					DW	0
 			COUNTER_STR				DB	'00000$'
 		
+			HANDLER_STACK			DW	64	DUP(0)
 		
 		INT_HANDLER_CODE:
+		mov KEEP_SS, ss
+		mov KEEP_SP, sp
+		
+		mov word ptr HANDLER_STACK, ax
+		mov ax, CODE
+		mov ss, ax
+		mov sp, offset INT_HANDLER_CODE
+		mov ax, word ptr INT_HANDLER_CODE
+		
 		push ax
 		push bx
 		push cx
@@ -82,6 +96,13 @@ CODE SEGMENT
 		pop cx
 		pop bx
 		pop ax
+		
+		mov word ptr INT_HANDLER_CODE, ax
+		mov sp, KEEP_SP
+		mov ax, KEEP_SS
+		mov ss, ax
+		mov ax, word ptr INT_HANDLER_CODE
+		
 		iret
 	INT_HANDLER ENDP
 	
