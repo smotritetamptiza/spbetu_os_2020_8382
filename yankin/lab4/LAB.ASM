@@ -6,37 +6,36 @@ CODE SEGMENT
 		jmp INT_HANDLER_CODE
 		
 		INT_HANDLER_DATA:
-			INT_HANDLER_SIGNATURE	DW	1488h ; Делать лабки мы не бросим!
+			INT_HANDLER_SIGNATURE	DW	7531h
 			KEEP_CS   				DW 	0
 			KEEP_IP   				DW 	0
 			KEEP_PSP  				DW 	0
 			
 			KEEP_SS					DW	0
 			KEEP_SP					DW	0
+			KEEP_AX					DW	0
 			
 			COUNTER					DW	0
 			COUNTER_STR				DB	'00000$'
 		
-			HANDLER_STACK			DW	20	DUP(0)
+			HANDLER_STACK			DW	100	DUP(0)
 		
 		INT_HANDLER_CODE:
 		mov KEEP_SS, ss
 		mov KEEP_SP, sp
+		mov KEEP_AX, ax
 		
-		mov word ptr HANDLER_STACK, ax
-		mov ax, CODE
+		mov ax, seg HANDLER_STACK
 		mov ss, ax
 		mov sp, offset INT_HANDLER_CODE
-		mov ax, word ptr INT_HANDLER_CODE
 		
-		push ax
 		push bx
 		push cx
 		push dx
 		push si
 		push ds
 		
-		mov ax, CODE
+		mov ax, seg INT_HANDLER_DATA
 		mov ds, ax
 		
 		
@@ -67,7 +66,7 @@ CODE SEGMENT
 		push es
 		push bp
 		
-		mov ax, CODE
+		mov ax, seg COUNTER_STR
 		mov es, ax
 		mov bp, offset COUNTER_STR
 		
@@ -87,21 +86,19 @@ CODE SEGMENT
 		mov ah, 02h
 		int 10h
 		
-		mov al, 20h
-		out 20h, al
-		
 		pop ds
 		pop si
 		pop dx
 		pop cx
 		pop bx
-		pop ax
 		
-		mov word ptr INT_HANDLER_CODE, ax
 		mov sp, KEEP_SP
 		mov ax, KEEP_SS
 		mov ss, ax
-		mov ax, word ptr INT_HANDLER_CODE
+		mov ax, KEEP_AX
+		
+		mov al, 20h
+		out 20h, al
 		
 		iret
 	INT_HANDLER ENDP
