@@ -25,8 +25,7 @@ ROUT	PROC	FAR
 		  mov KEEP_AX,AX
 		  mov AX,seg INT_STACK
 		  mov SS,AX
-		  add AX,100h
-		  mov SP,AX
+		  mov SP, offset int_init
 		  
 		  push DS
 		  push DX
@@ -99,6 +98,7 @@ ROUT	ENDP
 WRD_TO_DEC PROC near
 ;перевод в 10 с/с 16-разрядного числа
 ;в DX:АХ - число, в SI - адрес последнего символа
+		  push AX
 		  push CX
 		  mov CX,10
 loop_wd:  div CX
@@ -106,13 +106,11 @@ loop_wd:  div CX
 		  mov [SI],DL
 		  dec SI
 		  xor DX,DX
-		  cmp AX,10
-		  jae loop_wd
 		  cmp AL,00h
-		  je end_lwd
-		  or AL,30h
-		  mov [SI],AL
+		  jne loop_wd
+		  
 end_lwd:  pop CX
+		  pop AX
 		  ret
 WRD_TO_DEC	ENDP
 
